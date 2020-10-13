@@ -91,7 +91,9 @@ def main():
                     platform_direction = -1
 
             elif event.type == pg.KEYUP:
-                platform_direction = 0
+                if event.key == pg.K_RIGHT and platform_direction == 1 or \
+                        event.key == pg.K_LEFT and platform_direction == -1:
+                    platform_direction = 0
 
         moving_x = ball_speed * ball_direction_x
         moving_y = ball_speed * ball_direction_y
@@ -111,7 +113,7 @@ def main():
             ball_direction_x *= -1
             ball_direction_y *= -1
             score.score += 1
-            ball_speed += 0.05
+            ball_speed += 0.5
 
         ballrect.x += moving_x
         ballrect.y += moving_y
