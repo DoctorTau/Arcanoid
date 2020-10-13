@@ -50,7 +50,7 @@ def main():
     ball = pg.image.load("basketball.png")
     ballrect = ball.get_rect()
     ballrect.x = width//2
-    ballrect.y = height//2
+    ballrect.y = 0
     platform = Platform(250, 40, width // 2 - 250 // 2, 9 * height // 10)
     platform_direction = 0
     moving = 5
@@ -73,10 +73,12 @@ def main():
         platform_position = platform.get_position()
         if ballrect.x + 100 + moving_x >= width or ballrect.x + moving_x <= 0:
             ball_direction_x *= -1
-        if ballrect.y + 100 + moving_y >= height or ballrect.y + moving_y <= 0:
+        if ballrect.y + moving_y <= 0:
             ball_direction_y *= -1
+        elif ballrect.y + 100 + moving_y >= height:
+            ball_direction_x = ball_direction_y = 0
         if ((ballrect.x + moving_x >= platform.x_place and ballrect.x + 100 + moving_x <= platform_position[0]) and \
-                (ballrect.y + 100 + moving_y >= platform.y_place and ballrect.y + 100 + moving_y <= platform_position[1])):
+                (ballrect.y + 100 + moving_y >= platform.y_place)):
             ball_direction_x *= -1
             ball_direction_y *= -1
             score.score += 1
