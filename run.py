@@ -7,7 +7,7 @@ class Platform:
     height = 0
     x_place = 0
     y_place = 0
-    speed = 5
+    speed = 10
 
     def __init__(self, w, h, x, y):
         self.width = w
@@ -108,12 +108,12 @@ def main():
             ball_direction_x = ball_direction_y = 0
             game_over_flag = True
 
-        if ((ballrect.x + moving_x >= platform.x_place and ballrect.x + 100 + moving_x <= platform_position[0]) and \
-                (ballrect.y + 103 + moving_y >= platform.y_place)):
+        if ((ballrect.x + 100 + moving_x >= platform.x_place and ballrect.x + moving_x <= platform_position[0]) and \
+                (ballrect.y + 100 + moving_y >= platform.y_place)):
             ball_direction_x *= -1
             ball_direction_y *= -1
             score.score += 1
-            ball_speed += 0.5
+            ball_speed += 0.2
 
         ballrect.x += moving_x
         ballrect.y += moving_y
