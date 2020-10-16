@@ -7,7 +7,7 @@ class Platform:
     height = 0
     x_place = 0
     y_place = 0
-    speed = 10
+    speed = 7
 
     def __init__(self, w, h, x, y):
         self.width = w
