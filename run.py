@@ -2,29 +2,59 @@ import pygame as pg
 import sys
 
 
-class Platform:
-    width = 0
-    height = 0
+class GameObject:
+
     x_place = 0
     y_place = 0
-    speed = 7
+    width = 0
+    height = 0
 
-    def __init__(self, w, h, x, y):
-        self.width = w
-        self.height = h
-        self.x_place = x
-        self.y_place = y
+    def __init__(self, x_place, y_place, width, height):
+        self.x_place = x_place
+        self.y_place = y_place
+        self.width = width
+        self.height = height
+
+    def is_crossing(self, other):
+        return (self.y_place < other.y_place + other.screen_height or
+                self.y_place + self.height > other.y_place or
+                self.x_place + self.width < other.x_place or
+                self.x_place > other.x_place + other.screen_width)
+
+
+class Platform(GameObject):
+
+    def __init__(self, x_place, y_place, width, height, speed):
+        super().__init__(x_place, y_place, width, height)
+        self.speed = speed
 
     def paint(self, screen):
         pg.draw.rect(screen, white, (self.x_place, self.y_place, self.width, self.height), 0)
 
     def moving(self, direction):
-        if self.x_place + self.width + self.speed * direction < width and self.x_place + self.speed * direction > 0:
+        if self.x_place + self.width + self.speed * direction < screen_width and self.x_place + self.speed * direction > 0:
             self.x_place += self.speed * direction
 
     def get_position(self):
         position = self.x_place + self.width, self.y_place + self.height
         return position
+
+
+class Ball(GameObject):
+
+    def __init__(self, x_place, y_place, width, height,  speed):
+        super().__init__(x_place, y_place, width, height)
+        self.speed = speed
+        self.picture = 'basketball.png'
+        self.direction_x = 1
+        self.direction_y = 1
+
+    def move(self):
+        self.x_place += self.speed * self.direction_x
+        self.y_place += self.speed * self.direction_y
+
+    def paint(self, screen):
+        screen.blit(self.picture, (self.x_place, self.y_place))
 
 
 class Score:
@@ -46,15 +76,15 @@ class GameOverText:
         font = pg.font.SysFont('Comic Sans MS', 70, True)
         ts_1 = font.render(self.data_1, False, white)
         ts_2 = font.render(self.data_2, False, white)
-        screen.blit(ts_1, (width // 2 - 90, height // 2 - 50))
-        screen.blit(ts_2, (width // 2 - 85, height // 2))
+        screen.blit(ts_1, (screen_width // 2 - 90, screen_height // 2 - 50))
+        screen.blit(ts_2, (screen_width // 2 - 85, screen_height // 2))
 
-        font_tip =pg.font.SysFont('Comic Sans MS', 30, True)
+        font_tip = pg.font.SysFont('Comic Sans MS', 30, True)
         ts_tip = font_tip.render(self.tip, False, white)
-        screen.blit(ts_tip, (width // 2 - 120, height // 2 + 70))
+        screen.blit(ts_tip, (screen_width // 2 - 120, screen_height // 2 + 70))
 
 
-size = width, height = 800, 600
+size = screen_width, screen_height = 800, 600
 black = 0, 0, 0
 white = 255, 255, 255
 
@@ -68,12 +98,12 @@ def main():
 
     ball = pg.image.load("basketball.png")
     ballrect = ball.get_rect()
-    ballrect.x = width//2
+    ballrect.x = screen_width // 2
     ballrect.y = 0
     ball_speed = 5
     ball_direction_x, ball_direction_y = 1, 1
 
-    platform = Platform(250, 40, width // 2 - 250 // 2, 9 * height // 10)
+    platform = Platform(screen_width // 2 - 250 // 2, screen_height // 10 * 9, 250, 40, 7)
     platform_direction = 0
 
     score = Score()
@@ -100,11 +130,11 @@ def main():
 
         platform_position = platform.get_position()
 
-        if ballrect.x + 100 + moving_x >= width or ballrect.x + moving_x <= 0:
+        if ballrect.x + 100 + moving_x >= screen_width or ballrect.x + moving_x <= 0:
             ball_direction_x *= -1
         if ballrect.y + moving_y <= 0:
             ball_direction_y *= -1
-        elif ballrect.y + 100 + moving_y >= height:
+        elif ballrect.y + 100 + moving_y >= screen_height:
             ball_direction_x = ball_direction_y = 0
             game_over_flag = True
 
@@ -122,7 +152,7 @@ def main():
         screen.fill(black)
         screen.blit(ball, ballrect)
         platform.paint(screen)
-        score.paint(screen, width - 150, 0)
+        score.paint(screen, screen_width - 150, 0)
 
         pg.display.flip()
         pg.time.wait(10)
@@ -137,7 +167,7 @@ def main():
                         game_over = True
                         game_over_flag = False
             screen.fill(black)
-            score.paint(screen, width // 2 - 50, height // 2 + 45)
+            score.paint(screen, screen_width // 2 - 50, screen_height // 2 + 45)
             game_over_text.paint(screen)
             pg.display.flip()
 
