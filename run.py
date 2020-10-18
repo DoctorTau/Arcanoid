@@ -3,7 +3,6 @@ import sys
 
 
 class GameObject:
-
     x_place = 0
     y_place = 0
     width = 0
@@ -15,11 +14,11 @@ class GameObject:
         self.width = width
         self.height = height
 
-    def is_crossing(self, other):
-        return (self.y_place < other.y_place + other.screen_height or
-                self.y_place + self.height > other.y_place or
-                self.x_place + self.width < other.x_place or
-                self.x_place > other.x_place + other.screen_width)
+    def is_crossing_object(self, other):
+        return not (self.y_place > other.y_place + other.height or
+                    self.y_place + self.height < other.y_place or
+                    self.x_place + self.width < other.x_place or
+                    self.x_place > other.x_place + other.width)
 
 
 class Platform(GameObject):
@@ -27,29 +26,44 @@ class Platform(GameObject):
     def __init__(self, x_place, y_place, width, height, speed):
         super().__init__(x_place, y_place, width, height)
         self.speed = speed
+        self.direction_x = 0
+        self.direction_y = 0
 
     def paint(self, screen):
         pg.draw.rect(screen, white, (self.x_place, self.y_place, self.width, self.height), 0)
 
-    def moving(self, direction):
-        if self.x_place + self.width + self.speed * direction < screen_width and self.x_place + self.speed * direction > 0:
-            self.x_place += self.speed * direction
+    def move(self):
+        if not self.is_crossing_screen_x():
+            self.x_place += self.speed * self.direction_x
+
+    def is_crossing_screen_x(self):
+        return self.x_place + self.width + self.speed * self.direction_x >= screen_width or \
+               self.x_place + self.speed * self.direction_x <= 0
+
+    def is_crossing_screen_y_top(self):
+        return self.y_place + self.speed * self.direction_y <= 0
+
+    def is_crossing_screen_y_bottom(self):
+        return self.y_place + self.height + self.speed * self.direction_y >= screen_height
 
     def get_position(self):
         position = self.x_place + self.width, self.y_place + self.height
         return position
 
 
-class Ball(GameObject):
+class Ball(Platform):
 
-    def __init__(self, x_place, y_place, width, height,  speed):
-        super().__init__(x_place, y_place, width, height)
-        self.speed = speed
-        self.picture = 'basketball.png'
+    def __init__(self, x_place, y_place, width, height, speed):
+        super().__init__(x_place, y_place, width, height, speed)
+        self.picture = pg.image.load('basketball.png')
         self.direction_x = 1
-        self.direction_y = 1
+        self.direction_y = -1
 
     def move(self):
+        if self.is_crossing_screen_x():
+            self.direction_x *= -1
+        if self.is_crossing_screen_y_top():
+            self.direction_y *= -1
         self.x_place += self.speed * self.direction_x
         self.y_place += self.speed * self.direction_y
 
@@ -96,15 +110,9 @@ def main():
     game_over = False
     game_over_flag = False
 
-    ball = pg.image.load("basketball.png")
-    ballrect = ball.get_rect()
-    ballrect.x = screen_width // 2
-    ballrect.y = 0
-    ball_speed = 5
-    ball_direction_x, ball_direction_y = 1, 1
+    ball = Ball(screen_width // 2, 0, 100, 100, 5)
 
     platform = Platform(screen_width // 2 - 250 // 2, screen_height // 10 * 9, 250, 40, 7)
-    platform_direction = 0
 
     score = Score()
     game_over_text = GameOverText()
@@ -116,41 +124,29 @@ def main():
 
             elif event.type == pg.KEYDOWN:
                 if event.key == pg.K_RIGHT:
-                    platform_direction = 1
+                    platform.direction_x = 1
                 elif event.key == pg.K_LEFT:
-                    platform_direction = -1
+                    platform.direction_x = -1
 
             elif event.type == pg.KEYUP:
-                if event.key == pg.K_RIGHT and platform_direction == 1 or \
-                        event.key == pg.K_LEFT and platform_direction == -1:
-                    platform_direction = 0
+                if event.key == pg.K_RIGHT and platform.direction_x == 1 or \
+                        event.key == pg.K_LEFT and platform.direction_x == -1:
+                    platform.direction_x = 0
 
-        moving_x = ball_speed * ball_direction_x
-        moving_y = ball_speed * ball_direction_y
-
-        platform_position = platform.get_position()
-
-        if ballrect.x + 100 + moving_x >= screen_width or ballrect.x + moving_x <= 0:
-            ball_direction_x *= -1
-        if ballrect.y + moving_y <= 0:
-            ball_direction_y *= -1
-        elif ballrect.y + 100 + moving_y >= screen_height:
-            ball_direction_x = ball_direction_y = 0
+        if ball.is_crossing_screen_y_bottom():
             game_over_flag = True
 
-        if ((ballrect.x + 100 + moving_x >= platform.x_place and ballrect.x + moving_x <= platform_position[0]) and \
-                (ballrect.y + 100 + moving_y >= platform.y_place)):
-            ball_direction_x *= -1
-            ball_direction_y *= -1
+        if ball.is_crossing_object(platform):
+            ball.direction_x *= -1
+            ball.direction_y *= -1
             score.score += 1
-            ball_speed += 0.2
+            ball.speed += 0.2
 
-        ballrect.x += moving_x
-        ballrect.y += moving_y
-        platform.moving(platform_direction)
+        platform.move()
+        ball.move()
 
         screen.fill(black)
-        screen.blit(ball, ballrect)
+        ball.paint(screen)
         platform.paint(screen)
         score.paint(screen, screen_width - 150, 0)
 
