@@ -50,12 +50,21 @@ class Platform(GameObject):
         position = self.x_place + self.width, self.y_place + self.height
         return position
 
+    def collision_round(self, other):
+
+        return
+
 
 class Ball(Platform):
 
-    def __init__(self, x_place, y_place, width, height, speed):
+    def __init__(self, x_place, y_place, width, height, speed, picture=None):
         super().__init__(x_place, y_place, width, height, speed)
-        self.picture = pg.image.load('basketball.png')
+        if picture:
+            self.picture = pg.image.load(picture)
+        self.rect = self.picture.get_rect()
+        self.width = self.rect.width
+        self.height = self.rect.height
+        self.rad = self.width // 2
         self.direction_x = 1
         self.direction_y = -1
 
@@ -110,7 +119,7 @@ def main():
     game_over = False
     game_over_flag = False
 
-    ball = Ball(screen_width // 2, 0, 100, 100, 5)
+    ball = Ball(screen_width // 2, 0, 100, 100, 5, 'basketball.png')
 
     platform = Platform(screen_width // 2 - 250 // 2, screen_height // 10 * 9, 250, 40, 7)
 
@@ -137,7 +146,6 @@ def main():
             game_over_flag = True
 
         if ball.is_crossing_object(platform):
-            ball.direction_x *= -1
             ball.direction_y *= -1
             score.score += 1
             ball.speed += 0.2
