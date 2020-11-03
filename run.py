@@ -21,7 +21,22 @@ class GameObject:
                     self.x_place > other.x_place + other.width)
 
 
-class Platform(GameObject):
+class PlatformGreen(GameObject):
+
+    def __init__(self, x_place, y_place, width, height, color=None):
+        super().__init__(x_place, y_place, width, height)
+        if color is None:
+            color = [0, 0, 0]
+        self.color = color
+
+    def paint(self, screen):
+        pg.draw.rect(screen, self.color, (self.x_place, self.y_place, self.width, self.height), 0)
+
+    def get_type(self):
+        return str(self.color)
+
+
+class PlatformPlayer(GameObject):
 
     def __init__(self, x_place, y_place, width, height, speed):
         super().__init__(x_place, y_place, width, height)
@@ -51,7 +66,7 @@ class Platform(GameObject):
         return position
 
 
-class Ball(Platform):
+class Ball(PlatformPlayer):
 
     def __init__(self, x_place, y_place, width, height, speed, picture=None):
         super().__init__(x_place, y_place, width, height, speed)
@@ -80,17 +95,21 @@ class Ball(Platform):
         screen.blit(self.picture, (self.x_place, self.y_place))
 
     def ball_cross_platform(self, other):
-        if self.centre_y + self.rad >= other.y_place and other.x_place <= self.centre_x <= other.x_place + other.width:
+        if (abs(self.centre_y + self.rad - other.y_place) <= self.speed or
+            abs(self.centre_y - self.rad - other.y_place - other.height) <= self.speed) and \
+                other.x_place <= self.centre_x <= other.x_place + other.width:
             self.direction_y *= -1
             return True
-        elif (self.centre_x - other.x_place)**2 + (self.centre_y - other.y_place)**2 <= self.rad**2 or \
-                (self.centre_x - other.x_place + other.width)**2 + (self.centre_y - other.y_place)**2 \
-                <= self.rad**2:
+        elif abs((self.centre_x - other.x_place)**2 + (self.centre_y - other.y_place)**2) <= self.rad**2 + self.speed or\
+            abs((self.centre_x - other.x_place - other.width)**2 + (self.centre_y - other.y_place)**2) <= self.rad**2 \
+            + self.speed or abs((self.centre_x - other.x_place)**2 + (self.centre_y - other.y_place - other.height)**2)\
+            <= self.rad**2 + self.speed or abs((self.centre_x - other.x_place - other.width)**2 +
+            (self.centre_y - other.y_place - other.height)**2) <= self.rad**2 + self.speed:
             self.direction_y *= -1
             self.direction_x *= -1
             return True
-        elif self.centre_x + self.rad >= other.x_place and other.y_place <= self.y_place <= other.y_place\
-                + other.height or self.centre_x - self.rad <= other.x_place + other.width and\
+        elif (abs(self.centre_x + self.rad - other.x_place) <= self.speed
+              or abs(self.centre_x - self.rad - other.x_place + other.width) <= self.speed) and \
                 other.y_place <= self.y_place <= other.y_place + other.height:
             self.direction_x *= -1
             return True
@@ -127,6 +146,8 @@ class GameOverText:
 size = screen_width, screen_height = 1200, 800
 black = 0, 0, 0
 white = 255, 255, 255
+green = 0, 255, 0
+yellow = 0, 255, 255
 
 
 def main():
@@ -136,12 +157,15 @@ def main():
     game_over = False
     game_over_flag = False
 
-    ball = Ball(screen_width // 2, 0, 100, 100, 5, 'basketball.png')
+    ball = Ball(screen_width // 2, screen_height // 2, 100, 100, 5, 'basketball.png')
 
-    platform = Platform(screen_width // 2 - 250 // 2, screen_height // 10 * 9, 250, 40, 7)
+    platform = PlatformPlayer(screen_width // 2 - 250 // 2, screen_height // 10 * 9, 250, 40, 7)
 
     score = Score()
     game_over_text = GameOverText()
+
+    colors = [green, yellow]
+    platform_list = [[PlatformGreen(20 + i, 20 +  merge, 180, 30, j) for i in range(0, screen_width, 200)] for j in colors for merge in range(0,200,100)]
 
     while not game_over:
         for event in pg.event.get():
@@ -168,10 +192,18 @@ def main():
         platform.move()
         ball.move()
 
+        for i in range(len(platform_list)):
+            for j in range(len(platform_list)):
+                if ball.ball_cross_platform(platform_list[i][j]) != 0:
+                    platform_list[i][j] = PlatformGreen(0, 0, 0, 0)
+
         screen.fill(black)
         ball.paint(screen)
         platform.paint(screen)
         score.paint(screen, screen_width - 150, 0)
+        for i in platform_list:
+            for j in i:
+                j.paint(screen)
 
         pg.display.flip()
         pg.time.wait(10)
