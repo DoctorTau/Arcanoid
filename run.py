@@ -50,10 +50,6 @@ class Platform(GameObject):
         position = self.x_place + self.width, self.y_place + self.height
         return position
 
-    def collision_round(self, other):
-
-        return
-
 
 class Ball(Platform):
 
@@ -65,6 +61,8 @@ class Ball(Platform):
         self.width = self.rect.width
         self.height = self.rect.height
         self.rad = self.width // 2
+        self.centre_x = self.x_place + self.rad
+        self.centre_y = self.y_place + self.rad
         self.direction_x = 1
         self.direction_y = -1
 
@@ -75,9 +73,28 @@ class Ball(Platform):
             self.direction_y *= -1
         self.x_place += self.speed * self.direction_x
         self.y_place += self.speed * self.direction_y
+        self.centre_x = self.x_place + self.rad
+        self.centre_y = self.y_place + self.rad
 
     def paint(self, screen):
         screen.blit(self.picture, (self.x_place, self.y_place))
+
+    def ball_cross_platform(self, other):
+        if self.centre_y + self.rad >= other.y_place and other.x_place <= self.centre_x <= other.x_place + other.width:
+            self.direction_y *= -1
+            return True
+        elif (self.centre_x - other.x_place)**2 + (self.centre_y - other.y_place)**2 <= self.rad**2 or \
+                (self.centre_x - other.x_place + other.width)**2 + (self.centre_y - other.y_place)**2 \
+                <= self.rad**2:
+            self.direction_y *= -1
+            self.direction_x *= -1
+            return True
+        elif self.centre_x + self.rad >= other.x_place and other.y_place <= self.y_place <= other.y_place\
+                + other.height or self.centre_x - self.rad <= other.x_place + other.width and\
+                other.y_place <= self.y_place <= other.y_place + other.height:
+            self.direction_x *= -1
+            return True
+        return False
 
 
 class Score:
@@ -107,7 +124,7 @@ class GameOverText:
         screen.blit(ts_tip, (screen_width // 2 - 120, screen_height // 2 + 70))
 
 
-size = screen_width, screen_height = 800, 600
+size = screen_width, screen_height = 1200, 800
 black = 0, 0, 0
 white = 255, 255, 255
 
@@ -145,11 +162,9 @@ def main():
         if ball.is_crossing_screen_y_bottom():
             game_over_flag = True
 
-        if ball.is_crossing_object(platform):
-            ball.direction_y *= -1
+        if ball.ball_cross_platform(platform):
             score.score += 1
             ball.speed += 0.2
-
         platform.move()
         ball.move()
 
