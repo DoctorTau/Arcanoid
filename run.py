@@ -111,20 +111,36 @@ class GameOverText:
     data_1 = 'GAME'
     data_2 = 'OVER'
     tip = "Press Space to exit"
+    lieders = {}
+    with open('Lieder_bord.txt') as fil:
+        for l in fil:
+            nam, sc = l.split()
+            sc = int(sc)
+            lieders[nam] = sc
 
-    def paint(self, screen):
+    def paint(self, screen, pl_score):
         font = pg.font.SysFont('Comic Sans MS', 70, True)
         ts_1 = font.render(self.data_1, False, white)
         ts_2 = font.render(self.data_2, False, white)
-        screen.blit(ts_1, (screen_width // 2 - 90, screen_height // 2 - 50))
-        screen.blit(ts_2, (screen_width // 2 - 85, screen_height // 2))
+        screen.blit(ts_1, (screen_width // 2 - 90, screen_height // 2 - 250))
+        screen.blit(ts_2, (screen_width // 2 - 85, screen_height // 2 - 200))
+        font = pg.font.SysFont('Comic Sans MS', 30, True)
+        merge = 150
+        for i in self.lieders:
+            text = i
+            ts = font.render(text, False, white)
+            screen.blit(ts, (screen_width // 2 - 120, screen_height // 2 - merge))
+            text = str(self.lieders[i])
+            ts = font.render(text, False, white)
+            screen.blit(ts, (screen_width // 2 + 100, screen_height // 2 - merge))
 
-        font_tip = pg.font.SysFont('Comic Sans MS', 30, True)
-        ts_tip = font_tip.render(self.tip, False, white)
-        screen.blit(ts_tip, (screen_width // 2 - 120, screen_height // 2 + 70))
+            merge -= 30
+
+        ts_tip = font.render(self.tip, False, white)
+        screen.blit(ts_tip, (screen_width // 2 - 120, screen_height // 2 + 170))
 
 
-size = screen_width, screen_height = 1200, 800
+size = screen_width, screen_height = 800, 600
 black = 0, 0, 0
 white = 255, 255, 255
 
@@ -186,8 +202,8 @@ def main():
                         game_over = True
                         game_over_flag = False
             screen.fill(black)
-            score.paint(screen, screen_width // 2 - 50, screen_height // 2 + 45)
-            game_over_text.paint(screen)
+            score.paint(screen, screen_width // 2 - 50, screen_height // 2 + 145)
+            game_over_text.paint(screen, score.score)
             pg.display.flip()
 
     sys.exit()
