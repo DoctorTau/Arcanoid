@@ -1,5 +1,7 @@
 import pygame as pg
 import sys
+import operator
+import collections
 
 
 class GameObject:
@@ -111,12 +113,12 @@ class GameOverText:
     data_1 = 'GAME'
     data_2 = 'OVER'
     tip = "Press Space to exit"
-    lieders = {}
-    with open('Lieder_bord.txt') as fil:
-        for l in fil:
-            nam, sc = l.split()
+    leaders = {}
+    with open('Leader_bord.txt') as fil:
+        for line in fil:
+            nam, sc = line.split()
             sc = int(sc)
-            lieders[nam] = sc
+            leaders[nam] = sc
 
     def paint(self, screen, pl_score):
         font = pg.font.SysFont('Comic Sans MS', 70, True)
@@ -126,11 +128,18 @@ class GameOverText:
         screen.blit(ts_2, (screen_width // 2 - 85, screen_height // 2 - 200))
         font = pg.font.SysFont('Comic Sans MS', 30, True)
         merge = 150
-        for i in self.lieders:
+        self.leaders['Player'] = pl_score
+        self.leaders = sorted(self.leaders.items(), key=operator.itemgetter(1))
+        self.leaders = collections.OrderedDict(self.leaders)
+        texts = [key for key in self.leaders]
+        values = [value for value in self.leaders.items()]
+        texts, values = texts[::-1], values[::-1]
+        for i in texts:
             text = i
             ts = font.render(text, False, white)
             screen.blit(ts, (screen_width // 2 - 120, screen_height // 2 - merge))
-            text = str(self.lieders[i])
+        for i in values:
+            text = str(i)
             ts = font.render(text, False, white)
             screen.blit(ts, (screen_width // 2 + 100, screen_height // 2 - merge))
 
