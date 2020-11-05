@@ -132,17 +132,18 @@ class GameOverText:
         self.leaders = sorted(self.leaders.items(), key=operator.itemgetter(1))
         self.leaders = collections.OrderedDict(self.leaders)
         texts = [key for key in self.leaders]
-        values = [value for value in self.leaders.items()]
+        values = [self.leaders[key] for key in self.leaders]
         texts, values = texts[::-1], values[::-1]
         for i in texts:
             text = i
             ts = font.render(text, False, white)
             screen.blit(ts, (screen_width // 2 - 120, screen_height // 2 - merge))
+            merge -= 30
+        merge = 150
         for i in values:
             text = str(i)
             ts = font.render(text, False, white)
             screen.blit(ts, (screen_width // 2 + 100, screen_height // 2 - merge))
-
             merge -= 30
 
         ts_tip = font.render(self.tip, False, white)
