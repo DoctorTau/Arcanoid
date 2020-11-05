@@ -81,7 +81,7 @@ class Ball(PlatformPlayer):
         self.centre_x = self.x_place + self.rad
         self.centre_y = self.y_place + self.rad
         self.direction_x = 1
-        self.direction_y = -1
+        self.direction_y = 1
 
     def move(self):
         if self.is_crossing_screen_x():
@@ -102,8 +102,8 @@ class Ball(PlatformPlayer):
                 other.x_place <= self.centre_x <= other.x_place + other.width:
             self.direction_y *= -1
             return True
-        elif abs((self.centre_x - other.x_place)**2 + (self.centre_y - other.y_place)**2) <= self.rad**2 + self.speed or\
-            abs((self.centre_x - other.x_place - other.width)**2 + (self.centre_y - other.y_place)**2) <= self.rad**2 \
+        elif abs((self.centre_x - other.x_place)**2 + (self.centre_y - other.y_place)**2) <= self.rad**2 + self.speed\
+        or abs((self.centre_x - other.x_place - other.width)**2 + (self.centre_y - other.y_place)**2) <= self.rad**2 \
             + self.speed or abs((self.centre_x - other.x_place)**2 + (self.centre_y - other.y_place - other.height)**2)\
             <= self.rad**2 + self.speed or abs((self.centre_x - other.x_place - other.width)**2 +
             (self.centre_y - other.y_place - other.height)**2) <= self.rad**2 + self.speed:
@@ -173,6 +173,7 @@ class GameOverText:
             f.write(texts[i] + ' ' + str(values[i]) + '\n')
         f.close()
 
+
 size = screen_width, screen_height = 1200, 800
 black = 0, 0, 0
 white = 255, 255, 255
@@ -193,8 +194,7 @@ def enter_name(screen):
     screen.blit(text_1, (screen_width // 2 - len(name_text) * 10, screen_height // 2 - 50))
     pg.display.update()
 
-    Typing = True
-    while Typing:
+    while True:
         event = pg.event.poll()
         keys = pg.key.get_pressed()
         if event.type == pg.QUIT:
@@ -202,7 +202,6 @@ def enter_name(screen):
 
         if event.type == pg.KEYDOWN:
             if event.key == pg.K_KP_ENTER:
-                Typing = False
                 break
             elif event.key == pg.K_SPACE:
                 pl_name += ' '
