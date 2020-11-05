@@ -21,7 +21,7 @@ class GameObject:
                     self.x_place > other.x_place + other.width)
 
 
-class PlatformGreen(GameObject):
+class CrashingPlatform(GameObject):
 
     def __init__(self, x_place, y_place, width, height, color=None):
         super().__init__(x_place, y_place, width, height)
@@ -148,6 +148,8 @@ black = 0, 0, 0
 white = 255, 255, 255
 green = 0, 255, 0
 yellow = 255, 255, 0
+red = 255, 0, 0
+blue = 0, 200, 255
 
 
 def main():
@@ -164,9 +166,10 @@ def main():
     score = Score()
     game_over_text = GameOverText()
 
-    colors = [green, yellow]
-    platform_list = [PlatformGreen(20 + i, 20, 180, 30, green) for i in range(0, screen_width, 200)]
-    platform_list_yellow = [PlatformGreen(20 + i, 70, 180, 30, yellow) for i in range(0, screen_width, 200)]
+    platform_list_red = [CrashingPlatform(20 + i, 20, 180, 30, red) for i in range(0, screen_width, 200)]
+    platform_list_yellow = [CrashingPlatform(20 + i, 60, 180, 30, yellow) for i in range(0, screen_width, 200)]
+    platform_list_green = [CrashingPlatform(20 + i, 100, 180, 30, green) for i in range(0, screen_width, 200)]
+    platform_list_blue = [CrashingPlatform(20 + i, 140, 180, 30, blue) for i in range(0, screen_width, 200)]
 
     while not game_over:
         for event in pg.event.get():
@@ -193,20 +196,30 @@ def main():
         platform.move()
         ball.move()
 
-        for i in range(len(platform_list)):
-            if ball.ball_cross_platform(platform_list[i]) != 0:
-                platform_list[i] = PlatformGreen(0, 0, 0, 0)
+        for i in range(len(platform_list_red)):
+            if ball.ball_cross_platform(platform_list_red[i]) != 0:
+                platform_list_red[i] = CrashingPlatform(0, 0, 0, 0)
         for i in range(len(platform_list_yellow)):
             if ball.ball_cross_platform(platform_list_yellow[i]) != 0:
-                platform_list_yellow[i] = PlatformGreen(0, 0, 0, 0)
+                platform_list_yellow[i] = CrashingPlatform(0, 0, 0, 0)
+        for i in range(len(platform_list_green)):
+            if ball.ball_cross_platform(platform_list_green[i]) != 0:
+                platform_list_green[i] = CrashingPlatform(0, 0, 0, 0)
+        for i in range(len(platform_list_blue)):
+            if ball.ball_cross_platform(platform_list_blue[i]) != 0:
+                platform_list_blue[i] = CrashingPlatform(0, 0, 0, 0)
 
         screen.fill(black)
         ball.paint(screen)
         platform.paint(screen)
         score.paint(screen, screen_width - 150, 0)
-        for i in platform_list:
+        for i in platform_list_red:
             i.paint(screen)
         for i in platform_list_yellow:
+            i.paint(screen)
+        for i in platform_list_green:
+            i.paint(screen)
+        for i in platform_list_blue:
             i.paint(screen)
 
         pg.display.flip()
