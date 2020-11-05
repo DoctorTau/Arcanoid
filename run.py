@@ -85,14 +85,14 @@ class Ball(Platform):
         if self.centre_y + self.rad >= other.y_place and other.x_place <= self.centre_x <= other.x_place + other.width:
             self.direction_y *= -1
             return True
-        elif (self.centre_x - other.x_place)**2 + (self.centre_y - other.y_place)**2 <= self.rad**2 or \
-                (self.centre_x - other.x_place - other.width)**2 + (self.centre_y - other.y_place)**2 \
-                <= self.rad**2:
+        elif (self.centre_x - other.x_place) ** 2 + (self.centre_y - other.y_place) ** 2 <= self.rad ** 2 or \
+                (self.centre_x - other.x_place - other.width) ** 2 + (self.centre_y - other.y_place) ** 2 \
+                <= self.rad ** 2:
             self.direction_y *= -1
             self.direction_x *= -1
             return True
-        elif self.centre_x + self.rad >= other.x_place and other.y_place <= self.y_place <= other.y_place\
-                + other.height or self.centre_x - self.rad <= other.x_place + other.width and\
+        elif self.centre_x + self.rad >= other.x_place and other.y_place <= self.y_place <= other.y_place \
+                + other.height or self.centre_x - self.rad <= other.x_place + other.width and \
                 other.y_place <= self.y_place <= other.y_place + other.height:
             self.direction_x *= -1
             return True
@@ -120,7 +120,7 @@ class GameOverText:
             sc = int(sc)
             leaders[nam] = sc
 
-    def paint(self, screen, pl_score):
+    def paint(self, screen, pl_score, pl_name):
         font = pg.font.SysFont('Comic Sans MS', 70, True)
         ts_1 = font.render(self.data_1, False, white)
         ts_2 = font.render(self.data_2, False, white)
@@ -128,7 +128,7 @@ class GameOverText:
         screen.blit(ts_2, (screen_width // 2 - 85, screen_height // 2 - 200))
         font = pg.font.SysFont('Comic Sans MS', 30, True)
         merge = 150
-        self.leaders['Player'] = pl_score
+        self.leaders[pl_name] = pl_score
         self.leaders = sorted(self.leaders.items(), key=operator.itemgetter(1))
         self.leaders = collections.OrderedDict(self.leaders)
         texts = [key for key in self.leaders]
@@ -149,10 +149,59 @@ class GameOverText:
         ts_tip = font.render(self.tip, False, white)
         screen.blit(ts_tip, (screen_width // 2 - 120, screen_height // 2 + 170))
 
+        f = open('Leader_bord.txt', 'w')
+        for i in range(len(texts)):
+            f.write(texts[i] + ' ' + str(values[i]) + '\n')
+        f.close()
+
 
 size = screen_width, screen_height = 800, 600
 black = 0, 0, 0
 white = 255, 255, 255
+
+
+def enter_name(screen):
+    font_1 = pg.font.SysFont('Comic Sans MS', 50, True)
+    font_2 = pg.font.SysFont('Comic Sans MS', 40, True)
+
+    pl_name = ''
+    name_text = 'Enter your name'
+    text_1 = font_1.render(name_text, 1, white)
+    screen.fill(black)
+    screen.blit(text_1, (screen_width // 2 - len(name_text) * 10, screen_height // 2 - 50))
+    pg.display.update()
+
+    Typing = True
+    while Typing:
+        event = pg.event.poll()
+        keys = pg.key.get_pressed()
+        if event.type == pg.QUIT:
+            sys.exit()
+
+        if event.type == pg.KEYDOWN:
+            if event.key == pg.K_KP_ENTER:
+                Typing = False
+                break
+            elif event.key == pg.K_SPACE:
+                pl_name += ' '
+            key = pg.key.name(event.key)
+
+            if len(key) == 1:
+                if keys[pg.K_LSHIFT] or keys[pg.K_RSHIFT]:
+                    pl_name += key.upper()
+                else:
+                    pl_name += key
+            elif key == "backspace":
+                pl_name = pl_name[:len(pl_name) - 1]
+            elif event.key == pg.K_RETURN:
+                break
+
+            screen.fill(black)
+            text = font_2.render(pl_name, 1, white)
+            screen.blit(text_1, (screen_width // 2 - len(name_text) * 10, screen_height // 2 - 50))
+            screen.blit(text, (screen_width // 2 - len(pl_name) * 8, screen_height // 2))
+            pg.display.update()
+    return pl_name
 
 
 def main():
@@ -202,7 +251,11 @@ def main():
         pg.display.flip()
         pg.time.wait(10)
 
+        pl_name = ''
+
         while game_over_flag:
+            while not len(pl_name):
+                pl_name = enter_name(screen)
             for event in pg.event.get():
                 if event.type == pg.QUIT:
                     game_over = True
@@ -211,9 +264,10 @@ def main():
                     if event.key == pg.K_SPACE:
                         game_over = True
                         game_over_flag = False
+
             screen.fill(black)
             score.paint(screen, screen_width // 2 - 50, screen_height // 2 + 145)
-            game_over_text.paint(screen, score.score)
+            game_over_text.paint(screen, score.score, pl_name)
             pg.display.flip()
 
     sys.exit()
