@@ -84,7 +84,7 @@ class Ball(Platform):
             self.direction_y *= -1
             return True
         elif (self.centre_x - other.x_place)**2 + (self.centre_y - other.y_place)**2 <= self.rad**2 or \
-                (self.centre_x - other.x_place + other.width)**2 + (self.centre_y - other.y_place)**2 \
+                (self.centre_x - other.x_place - other.width)**2 + (self.centre_y - other.y_place)**2 \
                 <= self.rad**2:
             self.direction_y *= -1
             self.direction_x *= -1
