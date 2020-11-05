@@ -191,7 +191,6 @@ def main():
             game_over_flag = True
 
         if ball.ball_cross_platform(platform):
-            score.score += 1
             ball.speed += 0.2
         platform.move()
         ball.move()
@@ -199,15 +198,19 @@ def main():
         for i in range(len(platform_list_red)):
             if ball.ball_cross_platform(platform_list_red[i]) != 0:
                 platform_list_red[i] = CrashingPlatform(0, 0, 0, 0)
+                score.score += 20
         for i in range(len(platform_list_yellow)):
             if ball.ball_cross_platform(platform_list_yellow[i]) != 0:
                 platform_list_yellow[i] = CrashingPlatform(0, 0, 0, 0)
+                score.score += 10
         for i in range(len(platform_list_green)):
             if ball.ball_cross_platform(platform_list_green[i]) != 0:
                 platform_list_green[i] = CrashingPlatform(0, 0, 0, 0)
+                score.score += 5
         for i in range(len(platform_list_blue)):
             if ball.ball_cross_platform(platform_list_blue[i]) != 0:
                 platform_list_blue[i] = CrashingPlatform(0, 0, 0, 0)
+                score.score += 1
 
         screen.fill(black)
         ball.paint(screen)
