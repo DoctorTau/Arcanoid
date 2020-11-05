@@ -147,7 +147,7 @@ size = screen_width, screen_height = 1200, 800
 black = 0, 0, 0
 white = 255, 255, 255
 green = 0, 255, 0
-yellow = 0, 255, 255
+yellow = 255, 255, 0
 
 
 def main():
@@ -165,7 +165,8 @@ def main():
     game_over_text = GameOverText()
 
     colors = [green, yellow]
-    platform_list = [[PlatformGreen(20 + i, 20 +  merge, 180, 30, j) for i in range(0, screen_width, 200)] for j in colors for merge in range(0,200,100)]
+    platform_list = [PlatformGreen(20 + i, 20, 180, 30, green) for i in range(0, screen_width, 200)]
+    platform_list_yellow = [PlatformGreen(20 + i, 70, 180, 30, yellow) for i in range(0, screen_width, 200)]
 
     while not game_over:
         for event in pg.event.get():
@@ -193,17 +194,20 @@ def main():
         ball.move()
 
         for i in range(len(platform_list)):
-            for j in range(len(platform_list)):
-                if ball.ball_cross_platform(platform_list[i][j]) != 0:
-                    platform_list[i][j] = PlatformGreen(0, 0, 0, 0)
+            if ball.ball_cross_platform(platform_list[i]) != 0:
+                platform_list[i] = PlatformGreen(0, 0, 0, 0)
+        for i in range(len(platform_list_yellow)):
+            if ball.ball_cross_platform(platform_list_yellow[i]) != 0:
+                platform_list_yellow[i] = PlatformGreen(0, 0, 0, 0)
 
         screen.fill(black)
         ball.paint(screen)
         platform.paint(screen)
         score.paint(screen, screen_width - 150, 0)
         for i in platform_list:
-            for j in i:
-                j.paint(screen)
+            i.paint(screen)
+        for i in platform_list_yellow:
+            i.paint(screen)
 
         pg.display.flip()
         pg.time.wait(10)
